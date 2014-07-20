@@ -42,14 +42,14 @@ type Resource struct {
 // Creates a new Resource.
 func (r *Resource) Res(options ...interface{}) *Resource {
 	if len(options) > 0 {
-		var url string
+		var u string
 		if len(r.Url) > 0 {
-			url = r.Url + "/" + options[0].(string)
+			u = r.Url + "/" + options[0].(string)
 		} else {
-			url = options[0].(string)
+			u = options[0].(string)
 		}
 
-		newR := &Resource{Url: url, Api: r.Api, Headers: http.Header{}}
+		newR := &Resource{Url: u, Api: r.Api, Headers: http.Header{}, QueryValues: make(url.Values)}
 
 		if len(options) > 1 {
 			newR.Response = options[1]
