@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -81,29 +82,48 @@ func TestCanGetResource(t *testing.T) {
 		})
 
 	api := Api(testSrv.URL)
+
 	// Users endpoint
 	users := api.Res("users")
 
 	usernames := []string{"bndr", "torvalds"}
 
+	// construct mapstructure decoder
+	r := new(respStruct)
+	config := &mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		Result:           r}
+	dec, err := mapstructure.NewDecoder(config)
+	assert.NoError(t, err, "Error constructing mapstruct")
+
 	for _, username := range usernames {
-		// Create a new pointer to response Struct
-		r := new(respStruct)
 		// Get user with id i into the newly created response struct
-		_, err := users.Id(username, r).Get()
-		if err != nil {
-			t.Log("Error Getting Data from Test API\nErr:", err)
-		} else {
-			assert.Equal(t, r.Message, "", "Error message must be empty")
-			assert.Equal(t, r.Login, username, "Username should be equal")
-		}
+		res, err := users.Id(username).Get()
+		assert.NoError(t, err, "Error Getting Data from Test API")
+
+		err = dec.Decode(res.Response.Interface())
+		assert.NoError(t, err, "Error decoding mapstruct")
+
+		assert.Equal(t, r.Message, "", "Error message must be empty")
+		assert.Equal(t, r.Login, username, "Username should be equal")
+
 	}
-	resp := new(respStruct)
-	api.Res("users", resp).Id("bndr").Get()
-	assert.Equal(t, resp.Login, "bndr")
-	resp2 := new(respStruct)
-	api.Res("users").Id("bndr", resp2).Get()
-	assert.Equal(t, resp2.Login, "bndr")
+
+	res, err := api.Res("users").Id("bndr").Get()
+	assert.NoError(t, err, "Error Getting Data from Test API")
+
+	err = dec.Decode(res.Response.Interface())
+	assert.NoError(t, err, "Error decoding mapstruct")
+
+	assert.Equal(t, r.Login, "bndr")
+
+	res, err = api.Res("users").Id("bndr").Get()
+	assert.NoError(t, err, "Error Getting Data from Test API")
+
+	err = dec.Decode(res.Response.Interface())
+	assert.NoError(t, err, "Error decoding mapstruct")
+
+	assert.Equal(t, r.Login, "bndr")
 }
 
 func TestCanCreateResource(t *testing.T) {

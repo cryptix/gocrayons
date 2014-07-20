@@ -23,6 +23,8 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/bitly/go-simplejson"
 )
 
 var ErrCantUseAsQuery = errors.New("can't use options[0] as Query")
@@ -35,7 +37,7 @@ type Resource struct {
 	QueryValues url.Values
 	Payload     io.Reader
 	Headers     http.Header
-	Response    interface{}
+	Response    *simplejson.Json
 	Raw         *http.Response
 }
 
@@ -50,10 +52,6 @@ func (r *Resource) Res(options ...interface{}) *Resource {
 		}
 
 		newR := &Resource{Url: u, Api: r.Api, Headers: http.Header{}, QueryValues: make(url.Values)}
-
-		if len(options) > 1 {
-			newR.Response = options[1]
-		}
 
 		return newR
 	}
@@ -73,11 +71,8 @@ func (r *Resource) Id(options ...interface{}) *Resource {
 			id = strconv.FormatInt(v, 10)
 		}
 		url := r.Url + "/" + id
-		newR := &Resource{id: id, Url: url, Api: r.Api, Headers: http.Header{}, Response: &r.Response}
+		newR := &Resource{id: id, Url: url, Api: r.Api, Headers: http.Header{}, Response: r.Response}
 
-		if len(options) > 1 {
-			newR.Response = options[1]
-		}
 		return newR
 	}
 	return r
@@ -210,7 +205,7 @@ func (r *Resource) do(method string) (*Resource, error) {
 
 	defer resp.Body.Close()
 
-	err = json.NewDecoder(resp.Body).Decode(r.Response)
+	r.Response, err = simplejson.NewFromReader(resp.Body)
 	if err != nil {
 		return r, err
 	}
@@ -221,7 +216,10 @@ func (r *Resource) do(method string) (*Resource, error) {
 // Sets Payload for current Resource
 func (r *Resource) SetPayload(args interface{}) io.Reader {
 	var b []byte
-	b, _ = json.Marshal(args)
+	b, err := json.Marshal(args)
+	if err != nil {
+		panic(err)
+	}
 	r.SetHeader("Content-Type", "application/json")
 	return bytes.NewBuffer(b)
 }
