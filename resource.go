@@ -42,16 +42,13 @@ type Resource struct {
 }
 
 // Creates a new Resource.
-func (r *Resource) Res(options ...interface{}) *Resource {
-	if len(options) > 0 {
-		var u string
+func (r *Resource) Res(path string) *Resource {
+	if path != "" {
 		if len(r.Url) > 0 {
-			u = r.Url + "/" + options[0].(string)
-		} else {
-			u = options[0].(string)
+			path = r.Url + "/" + path
 		}
 
-		newR := &Resource{Url: u, Api: r.Api, Headers: http.Header{}, QueryValues: make(url.Values)}
+		newR := &Resource{Url: path, Api: r.Api, Headers: http.Header{}, QueryValues: make(url.Values)}
 
 		return newR
 	}
@@ -59,19 +56,22 @@ func (r *Resource) Res(options ...interface{}) *Resource {
 }
 
 // Same as Res() Method, but returns a Resource with url resource/:id
-func (r *Resource) Id(options ...interface{}) *Resource {
-	if len(options) > 0 {
-		id := ""
-		switch v := options[0].(type) {
-		default:
-			id = v.(string)
+func (r *Resource) Id(id interface{}) *Resource {
+	if id != nil {
+		var idStr string
+		switch v := id.(type) {
+		case string:
+			idStr = v
 		case int:
-			id = strconv.Itoa(v)
+			idStr = strconv.Itoa(v)
 		case int64:
-			id = strconv.FormatInt(v, 10)
+			idStr = strconv.FormatInt(v, 10)
+		default:
+			panic("unknown id type")
 		}
-		url := r.Url + "/" + id
-		newR := &Resource{id: id, Url: url, Api: r.Api, Headers: http.Header{}, Response: r.Response}
+
+		url := r.Url + "/" + idStr
+		newR := &Resource{id: idStr, Url: url, Api: r.Api, Headers: http.Header{}, Response: r.Response}
 
 		return newR
 	}
@@ -79,9 +79,10 @@ func (r *Resource) Id(options ...interface{}) *Resource {
 }
 
 // Sets QueryValues for current Resource
-func (r *Resource) SetQuery(querystring map[string]string) *Resource {
+
+func (r *Resource) SetQuery(qry map[string]string) *Resource {
 	r.QueryValues = make(url.Values)
-	for k, v := range querystring {
+	for k, v := range qry {
 		r.QueryValues.Set(k, v)
 	}
 	return r
@@ -89,28 +90,15 @@ func (r *Resource) SetQuery(querystring map[string]string) *Resource {
 
 // Performs a GET request on given Resource
 // Accepts map[string]string as parameter, will be used as querystring.
-func (r *Resource) Get(options ...interface{}) (*Resource, error) {
-	if len(options) > 0 {
-		if qry, ok := options[0].(map[string]string); ok {
-			r.SetQuery(qry)
-		} else {
-			return nil, ErrCantUseAsQuery
-		}
-
-	}
+func (r *Resource) Get(params map[string]string) (*Resource, error) {
+	r.SetQuery(params)
 	return r.do("GET")
 }
 
 // Performs a HEAD request on given Resource
 // Accepts map[string]string as parameter, will be used as querystring.
-func (r *Resource) Head(options ...interface{}) (*Resource, error) {
-	if len(options) > 0 {
-		if qry, ok := options[0].(map[string]string); ok {
-			r.SetQuery(qry)
-		} else {
-			return nil, ErrCantUseAsQuery
-		}
-	}
+func (r *Resource) Head(params map[string]string) (*Resource, error) {
+	r.SetQuery(params)
 	return r.do("HEAD")
 }
 
@@ -134,27 +122,15 @@ func (r *Resource) Post(options ...interface{}) (*Resource, error) {
 
 // Performs a Delete request on given Resource.
 // Accepts map[string]string as parameter, will be used as querystring.
-func (r *Resource) Delete(options ...interface{}) (*Resource, error) {
-	if len(options) > 0 {
-		if qry, ok := options[0].(map[string]string); ok {
-			r.SetQuery(qry)
-		} else {
-			return nil, ErrCantUseAsQuery
-		}
-	}
+func (r *Resource) Delete(params map[string]string) (*Resource, error) {
+	r.SetQuery(params)
 	return r.do("DELETE")
 }
 
 // Performs a Delete request on given Resource.
 // Accepts map[string]string as parameter, will be used as querystring.
-func (r *Resource) Options(options ...interface{}) (*Resource, error) {
-	if len(options) > 0 {
-		if qry, ok := options[0].(map[string]string); ok {
-			r.SetQuery(qry)
-		} else {
-			return nil, ErrCantUseAsQuery
-		}
-	}
+func (r *Resource) Options(params map[string]string) (*Resource, error) {
+	r.SetQuery(params)
 	return r.do("OPTIONS")
 }
 

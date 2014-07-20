@@ -54,7 +54,7 @@ func TestCanUsePathInResourceUrl(t *testing.T) {
 
 	res := Api(testSrv.URL+"/path/to/api", nil)
 
-	resp, err := res.Res("resname").Id("id123").Get()
+	resp, err := res.Res("resname").Id("id123").Get(nil)
 	assert.Nil(t, err, "err should be nil")
 	assert.Equal(t, "Okay", resp.Response.Get("Test").MustString(), "resp should be Okay")
 }
@@ -95,7 +95,7 @@ func TestCanGetResource(t *testing.T) {
 
 	for _, username := range usernames {
 		// Get user with id i into the newly created response struct
-		res, err := users.Id(username).Get()
+		res, err := users.Id(username).Get(nil)
 		assert.NoError(t, err, "Error Getting Data from Test API")
 
 		err = dec.Decode(res.Response.Interface())
@@ -106,7 +106,7 @@ func TestCanGetResource(t *testing.T) {
 
 	}
 
-	res, err := api.Res("users").Id("bndr").Get()
+	res, err := api.Res("users").Id("bndr").Get(nil)
 	assert.NoError(t, err, "Error Getting Data from Test API")
 
 	err = dec.Decode(res.Response.Interface())
@@ -114,7 +114,7 @@ func TestCanGetResource(t *testing.T) {
 
 	assert.Equal(t, r.Login, "bndr")
 
-	res, err = api.Res("users").Id("bndr").Get()
+	res, err = api.Res("users").Id("bndr").Get(nil)
 	assert.NoError(t, err, "Error Getting Data from Test API")
 
 	err = dec.Decode(res.Response.Interface())
@@ -173,7 +173,7 @@ func TestCanDeleteResource(t *testing.T) {
 
 	api := Api(testSrv.URL)
 	r := new(httpbinResponse)
-	res, err := api.Res("delete").Delete()
+	res, err := api.Res("delete").Delete(nil)
 	assert.NoError(t, err, "Error Getting Data from httpbin API")
 	r.Url, err = res.Response.Get("url").String()
 	assert.NoError(t, err, "Could not convert responses to map")
@@ -209,7 +209,7 @@ func TestDoNotDecodeBodyOnErr(t *testing.T) {
 
 	for _, code = range tests {
 		resp := make(map[string]interface{})
-		r, err := api.Id("error", &resp).Get()
+		r, err := api.Id("error").Get(nil)
 		if err != nil {
 			t.Fatal(err)
 		}
