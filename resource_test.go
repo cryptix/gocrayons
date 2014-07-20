@@ -28,6 +28,7 @@ type respStruct struct {
 	Name    string
 	Message string
 }
+
 type httpbinResponse struct {
 	Args    string
 	Headers map[string]string
@@ -53,13 +54,9 @@ func TestCanUsePathInResourceUrl(t *testing.T) {
 
 	res := Api(testSrv.URL+"/path/to/api", nil)
 
-	var resp struct {
-		Test string
-	}
-
-	_, err := res.Res("resname").Id("id123", &resp).Get()
+	resp, err := res.Res("resname").Id("id123").Get()
 	assert.Nil(t, err, "err should be nil")
-	assert.Equal(t, "Okay", resp.Test, "resp shoul be Okay")
+	assert.Equal(t, "Okay", resp.Response.Get("Test").MustString(), "resp should be Okay")
 }
 
 func TestCanUseAuthForApi(t *testing.T) {
@@ -139,7 +136,10 @@ func TestCanCreateResource(t *testing.T) {
 	api := Api(testSrv.URL)
 	payload := map[string]interface{}{"Key": "Value1"}
 	r := new(httpbinResponse)
-	api.Res("post", r).Post(payload)
+	res, err := api.Res("post").Post(payload)
+	assert.NoError(t, err, "Error Getting Data from httpbin API")
+	r.Json, err = res.Response.Get("json").Map()
+	assert.NoError(t, err, "Could not convert responses to map")
 	assert.Equal(t, r.Json["Key"], "Value1", "Payload must match")
 }
 
@@ -156,7 +156,10 @@ func TestCanPutResource(t *testing.T) {
 	api := Api(testSrv.URL)
 	payload := map[string]interface{}{"Key": "Value1"}
 	r := new(httpbinResponse)
-	api.Res("put", r).Put(payload)
+	res, err := api.Res("put").Put(payload)
+	assert.NoError(t, err, "Error Getting Data from httpbin API")
+	r.Json, err = res.Response.Get("json").Map()
+	assert.NoError(t, err, "Could not convert responses to map")
 	assert.Equal(t, r.Json["Key"], "Value1", "Payload must match")
 }
 
@@ -170,7 +173,10 @@ func TestCanDeleteResource(t *testing.T) {
 
 	api := Api(testSrv.URL)
 	r := new(httpbinResponse)
-	api.Id("delete", r).Delete()
+	res, err := api.Res("delete").Delete()
+	assert.NoError(t, err, "Error Getting Data from httpbin API")
+	r.Url, err = res.Response.Get("url").String()
+	assert.NoError(t, err, "Could not convert responses to map")
 	assert.Equal(t, r.Url, "https://httpbin.org/delete", "Url must match")
 }
 
