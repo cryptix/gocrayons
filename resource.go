@@ -120,6 +120,12 @@ func (r *Resource) Post(options ...interface{}) (*Resource, error) {
 	return r.do("POST")
 }
 
+// FormPost doesn't touch the payload
+func (r *Resource) FormPost(params map[string]string) (*Resource, error) {
+	r.SetQuery(params)
+	return r.do("POST")
+}
+
 // Performs a Delete request on given Resource.
 // Accepts map[string]string as parameter, will be used as querystring.
 func (r *Resource) Delete(params map[string]string) (*Resource, error) {
