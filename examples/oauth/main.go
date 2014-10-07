@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"code.google.com/p/goauth2/oauth"
-	"github.com/bndr/gopencils"
+	"github.com/cryptix/gocrayons"
 )
 
 // Oauth example taken from https://godoc.org/code.google.com/p/goauth2/oauth
