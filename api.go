@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package gopencils
+package gocrayons
 
 import (
 	"crypto/tls"
@@ -41,7 +41,7 @@ type ApiStruct struct {
 func Api(baseUrl string, options ...interface{}) *Resource {
 	u, err := url.Parse(baseUrl)
 	if err != nil {
-		// TODO: don't panic..
+		// BUG(cryptix): don't panic..
 		panic("Api() - url.Parse(baseUrl) Error:" + err.Error())
 	}
 

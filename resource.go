@@ -12,8 +12,8 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-// Gopencils is a Golang REST Client with which you can easily consume REST API's. Supported Response formats: JSON
-package gopencils
+// Package gocrayons is a Golang REST Client with which you can easily consume REST API's. Uses bily/simplejson
+package gocrayons
 
 import (
 	"bytes"

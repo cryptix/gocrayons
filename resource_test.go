@@ -1,4 +1,4 @@
-package gopencils
+package gocrayons
 
 import (
 	"fmt"
