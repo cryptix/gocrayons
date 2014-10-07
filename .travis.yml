@@ -7,3 +7,5 @@ go:
 install:
   - go get github.com/stretchr/testify/assert
   - go get code.google.com/p/goauth2/oauth
+  - go get github.com/bitly/go-simplejson
+  - go get github.com/mitchellh/mapstructure
