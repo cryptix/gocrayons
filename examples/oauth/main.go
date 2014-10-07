@@ -78,3 +78,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprintf(w, "%+v\n", resp.Response)
 }
+
+func main() {
+	http.HandleFunc("/", landing)
+	http.HandleFunc("/in", handler)
+	fmt.Println("Listening on :3000")
+	http.ListenAndServe(":3000", nil)
+}
