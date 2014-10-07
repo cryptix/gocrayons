@@ -10,10 +10,11 @@ gocrayons is a fork of [bndr/gopencils](https://github.com/bndr/gopencils). The 
 
 ## Usage example
 
-Sorry, TODO
+Please see the `examples` directory.
 
 ## Why?
 
+simplejson makes it easier to work with strange and irregular json that can't be simple handled by `encoding/json`'s `Unmarshal()`
 
 ## Is it ready?
 

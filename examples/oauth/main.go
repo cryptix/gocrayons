@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
+
 	"code.google.com/p/goauth2/oauth"
 	"github.com/bndr/gopencils"
-	"net/http"
 )
 
 // Oauth example taken from https://godoc.org/code.google.com/p/goauth2/oauth
@@ -43,23 +45,36 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// Now you can pass the authenticated Client to gopencils, and
 	// it will be used to make all the requests
-	api := gopencils.Api("http://your-api-url.com/api/", c)
+	api := gocrayons.Api("http://your-api-url.com/api/", c)
 
-	// Create a pointer to our response struct, which will hold the response
-	re := &respStruct{}
 	// Maybe some payload to send along with the request?
 	payload := map[string]interface{}{"Key1": "Value1"}
 
 	// Perform a GET request
 	// URL Requested: http://your-api-url.com/api/users
-	api.Res("users", re).Get()
+	resp, err := api.Res("users").Get(nil)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	fmt.Fprintf(w, "%+v\n", resp.Response)
 
 	// Perform a GET request with Querystring
 	querystring := map[string]string{"page": "100"}
 	// URL Requested: http://your-api-url.com/api/users/123/items?page=100
-	api.Res("users").Id(123).Res("items", re).Get(querystring)
+	resp, err = api.Res("users").Id(123).Res("items").Get(querystring)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	fmt.Fprintf(w, "%+v\n", resp.Response)
 
 	// Or perform a POST Request
 	// URL Requested: http://your-api-url.com/api/items/123 with payload as json Data
-	api.Res("items", re).Id(123).Post(payload)
+	resp, err = api.Res("items").Id(123).Post(payload)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	fmt.Fprintf(w, "%+v\n", resp.Response)
 }
