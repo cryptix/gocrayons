@@ -190,7 +190,16 @@ func TestPathSuffix(t *testing.T) {
 
 	api := Api(testSrv.URL, ".json")
 	r := new(httpbinResponse)
-	api.Res("item", r).Id(32).Get()
+	res, err := api.Res("item").Id(32).Get(nil)
+	assert.NoError(t, err, "Error requesting item")
+
+	config := &mapstructure.DecoderConfig{Result: r}
+	dec, err := mapstructure.NewDecoder(config)
+	assert.NoError(t, err, "Error constructing mapstructure")
+
+	err = dec.Decode(res.Response.Interface())
+	assert.NoError(t, err, "Error decoding response")
+
 	assert.Equal(t, r.Json["Key"], "Value1", "Payload must match")
 }
 
@@ -205,7 +214,15 @@ func TestPathSuffixWithQueryParam(t *testing.T) {
 
 	api := Api(testSrv.URL, ".json")
 	r := new(httpbinResponse)
-	api.Res("item", r).Id(42).Get(map[string]string{"param": "test"})
+	res, err := api.Res("item").Id(42).Get(map[string]string{"param": "test"})
+	assert.NoError(t, err, "Error requesting item")
+
+	config := &mapstructure.DecoderConfig{Result: r}
+	dec, err := mapstructure.NewDecoder(config)
+	assert.NoError(t, err, "Error constructing mapstructure")
+
+	err = dec.Decode(res.Response.Interface())
+	assert.NoError(t, err, "Error decoding response")
 	assert.Equal(t, r.Json["Key"], "Value1", "Payload must match")
 }
 
